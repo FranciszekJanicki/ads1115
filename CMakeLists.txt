@@ -4,10 +4,8 @@ target_sources(ads1115 PRIVATE
     "ads1115.c"
 )
 
-target_include_directories(ads1115 PUBLIC 
-)
-
-target_link_libraries(ads1115 PRIVATE
+target_include_directories(ads1115 PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_compile_options(ads1115 PUBLIC
