@@ -10,23 +10,22 @@ typedef struct {
 } ads1115_t;
 
 ads1115_err_t ads1115_initialize(ads1115_t* ads1115,
-                                 ads1115_config_t* config,
-                                 ads1115_interface_t* interface);
+                                 ads1115_config_t const* config,
+                                 ads1115_interface_t const* interface);
 ads1115_err_t ads1115_deinitialize(ads1115_t* ads1115);
 
-ads1115_err_t ads1115_get_conversion_scaled(ads1115_t const* ads1115, float32_t* scaled);
-ads1115_err_t ads1115_get_mux_conversion_scaled(ads1115_t const* ads1115,
-                                                ads1115_mux_t mux,
+ads1115_err_t ads1115_get_current_channel_voltage_data_scaled(ads1115_t const* ads1115, float32_t* scaled);
+ads1115_err_t ads1115_get_channel_voltage_data_scaled(ads1115_t const* ads1115,
+                                                ads1115_channel_t channel,
                                                 float32_t* scaled);
 
-ads1115_err_t ads1115_get_conversion_raw(ads1115_t const* ads1115, int16_t* raw);
-ads1115_err_t ads1115_get_mux_conversion_raw(ads1115_t const* ads1115,
-                                             ads1115_mux_t mux,
+ads1115_err_t ads1115_get_current_channel_voltage_data_raw(ads1115_t const* ads1115, int16_t* raw);
+ads1115_err_t ads1115_get_channel_voltage_data_raw(ads1115_t const* ads1115,
+                                             ads1115_channel_t channel,
                                              int16_t* raw);
 
 ads1115_err_t ads1115_trigger_oneshot_conversion(ads1115_t const* ads1115);
-
-ads1115_err_t ads1115_select_channel(ads1115_t const* ads1115, ads1115_mux_t mux);
+ads1115_err_t ads1115_select_channel(ads1115_t const* ads1115, ads1115_channel_t channel);
 
 ads1115_err_t ads1115_get_conversion_reg(ads1115_t const* ads1115, ads1115_conversion_reg_t* reg);
 

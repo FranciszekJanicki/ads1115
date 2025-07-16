@@ -43,8 +43,8 @@ static ads1115_err_t ads1115_bus_read_data(ads1115_t const* ads1115,
 }
 
 ads1115_err_t ads1115_initialize(ads1115_t* ads1115,
-                                 ads1115_config_t* config,
-                                 ads1115_interface_t* interface)
+                                 ads1115_config_t const* config,
+                                 ads1115_interface_t const* interface)
 {
     assert(ads1115 && config && interface);
 
@@ -66,37 +66,37 @@ ads1115_err_t ads1115_deinitialize(ads1115_t* ads1115)
     return err;
 }
 
-ads1115_err_t ads1115_get_conversion_scaled(ads1115_t const* ads1115, float32_t* scaled)
+ads1115_err_t ads1115_get_current_channel_voltage_data_scaled(ads1115_t const* ads1115, float32_t* scaled)
 {
     assert(ads1115);
 
     int16_t raw = {};
 
-    ads1115_err_t err = ads1115_get_conversion_raw(ads1115, &raw);
+    ads1115_err_t err = ads1115_get_current_channel_voltage_data_raw(ads1115, &raw);
 
     *scaled = (float32_t)raw * ads1115->config.scale;
 
     return err;
 }
 
-ads1115_err_t ads1115_get_mux_conversion_scaled(ads1115_t const* ads1115,
-                                                ads1115_mux_t mux,
+ads1115_err_t ads1115_get_channel_voltage_data_scaled(ads1115_t  const* ads1115,
+                                                ads1115_channel_t channel,
                                                 float32_t* scaled)
 {
     assert(ads1115 && scaled);
 
-    ads1115_err_t err = ads1115_select_channel(ads1115, mux);
-    err |= ads1115_get_conversion_scaled(ads1115, scaled);
+    ads1115_err_t err = ads1115_select_channel(ads1115, channel);
+    err |= ads1115_get_current_channel_voltage_data_scaled(ads1115, scaled);
 
     return err;
 }
 
-ads1115_err_t ads1115_get_conversion_raw(ads1115_t const* ads1115, int16_t* raw)
+ads1115_err_t ads1115_get_current_channel_voltage_data_raw(ads1115_t const* ads1115, int16_t* raw)
 {
     assert(ads1115);
 
     ads1115_conversion_reg_t reg = {};
-
+  
     ads1115_err_t err = ads1115_get_conversion_reg(ads1115, &reg);
 
     *raw = reg.conversion;
@@ -104,14 +104,14 @@ ads1115_err_t ads1115_get_conversion_raw(ads1115_t const* ads1115, int16_t* raw)
     return err;
 }
 
-ads1115_err_t ads1115_get_mux_conversion_raw(ads1115_t const* ads1115,
-                                             ads1115_mux_t mux,
+ads1115_err_t ads1115_get_channel_voltage_data_raw(ads1115_t const* ads1115,
+                                             ads1115_channel_t channel,
                                              int16_t* raw)
 {
     assert(ads1115 && raw);
 
-    ads1115_err_t err = ads1115_select_channel(ads1115, mux);
-    err |= ads1115_get_conversion_raw(ads1115, raw);
+    ads1115_err_t err = ads1115_select_channel(ads1115, channel);
+    err |= ads1115_get_current_channel_voltage_data_raw(ads1115, raw);
 
     return err;
 }
@@ -129,14 +129,14 @@ ads1115_err_t ads1115_trigger_oneshot_conversion(ads1115_t const* ads1115)
     return err;
 }
 
-ads1115_err_t ads1115_select_channel(ads1115_t const* ads1115, ads1115_mux_t mux)
+ads1115_err_t ads1115_select_channel(ads1115_t const* ads1115, ads1115_channel_t channel)
 {
     assert(ads1115);
 
     ads1115_config_reg_t reg = {};
 
     ads1115_err_t err = ads1115_get_config_reg(ads1115, &reg);
-    reg.mux = mux;
+    reg.mux = channel;
     err |= ads1115_set_config_reg(ads1115, &reg);
 
     return err;
@@ -149,7 +149,7 @@ ads1115_err_t ads1115_get_conversion_reg(ads1115_t const* ads1115, ads1115_conve
     uint8_t data[2] = {};
 
     ads1115_err_t err =
-        ads1115_bus_read_data(ads1115, ADS1115_REG_ADDR_CONVERSION, data, sizeof(data));
+        ads1115_bus_read_data(ads1115, ADS1115_REG_ADDRESS_CONVERSION, data, sizeof(data));
 
     reg->conversion = (int16_t)(((data[0] << 8) & 0xFF) | (data[1] & 0xFF));
 
@@ -162,7 +162,7 @@ ads1115_err_t ads1115_get_config_reg(ads1115_t const* ads1115, ads1115_config_re
 
     uint8_t data[2] = {};
 
-    ads1115_err_t err = ads1115_bus_read_data(ads1115, ADS1115_REG_ADDR_CONFIG, data, sizeof(data));
+    ads1115_err_t err = ads1115_bus_read_data(ads1115, ADS1115_REG_ADDRESS_CONFIG, data, sizeof(data));
 
     reg->os = (data[0] >> 7U) & 0x01U;
     reg->mux = (data[0] >> 4U) & 0x07U;
@@ -193,7 +193,7 @@ ads1115_err_t ads1115_set_config_reg(ads1115_t const* ads1115, ads1115_config_re
     data[1] |= (reg->comp_lat & 0x01U) << 2U;
     data[1] |= reg->comp_que & 0x03U;
 
-    return ads1115_bus_write_data(ads1115, ADS1115_REG_ADDR_CONFIG, data, sizeof(data));
+    return ads1115_bus_write_data(ads1115, ADS1115_REG_ADDRESS_CONFIG, data, sizeof(data));
 }
 
 ads1115_err_t ads1115_get_lo_thresh_reg(ads1115_t const* ads1115, ads1115_lo_thresh_reg_t* reg)
@@ -203,7 +203,7 @@ ads1115_err_t ads1115_get_lo_thresh_reg(ads1115_t const* ads1115, ads1115_lo_thr
     uint8_t data[2] = {};
 
     ads1115_err_t err =
-        ads1115_bus_read_data(ads1115, ADS1115_REG_ADDR_LO_THRESH, data, sizeof(data));
+        ads1115_bus_read_data(ads1115, ADS1115_REG_ADDRESS_LO_THRESH, data, sizeof(data));
 
     reg->lo_thresh = (int16_t)(((data[0] & 0xFF) << 8) | (data[1] & 0xFF));
 
@@ -220,7 +220,7 @@ ads1115_err_t ads1115_set_lo_thresh_reg(ads1115_t const* ads1115,
     data[0] = (uint8_t)((reg->lo_thresh >> 8) & 0xFF);
     data[1] = (uint8_t)(reg->lo_thresh & 0xFF);
 
-    return ads1115_bus_write_data(ads1115, ADS1115_REG_ADDR_LO_THRESH, data, sizeof(data));
+    return ads1115_bus_write_data(ads1115, ADS1115_REG_ADDRESS_LO_THRESH, data, sizeof(data));
 }
 
 ads1115_err_t ads1115_get_hi_thresh_reg(ads1115_t const* ads1115, ads1115_hi_thresh_reg_t* reg)
@@ -230,7 +230,7 @@ ads1115_err_t ads1115_get_hi_thresh_reg(ads1115_t const* ads1115, ads1115_hi_thr
     uint8_t data[2] = {};
 
     ads1115_err_t err =
-        ads1115_bus_read_data(ads1115, ADS1115_REG_ADDR_HI_THRESH, data, sizeof(data));
+        ads1115_bus_read_data(ads1115, ADS1115_REG_ADDRESS_HI_THRESH, data, sizeof(data));
 
     reg->hi_thresh = (int16_t)(((data[0] & 0xFF) << 8) | (data[1] & 0xFF));
 
@@ -247,5 +247,5 @@ ads1115_err_t ads1115_set_hi_thresh_reg(ads1115_t const* ads1115,
     data[0] = (uint8_t)((reg->hi_thresh >> 8) & 0xFF);
     data[1] = (uint8_t)(reg->hi_thresh & 0xFF);
 
-    return ads1115_bus_write_data(ads1115, ADS1115_REG_ADDR_HI_THRESH, data, sizeof(data));
+    return ads1115_bus_write_data(ads1115, ADS1115_REG_ADDRESS_HI_THRESH, data, sizeof(data));
 }
