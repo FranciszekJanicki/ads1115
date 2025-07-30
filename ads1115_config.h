@@ -5,6 +5,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef float float32_t;
 
 typedef enum {
@@ -116,5 +120,9 @@ inline float ads1115_range_to_scale(ads1115_full_scale_range_t range)
             return 0.0F;
     }
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ADS1115_ADS115_CONFIG_H

@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     int16_t conversion : 16;
 } ads1115_conversion_reg_t;
@@ -26,5 +30,9 @@ typedef struct {
 typedef struct {
     int16_t hi_thresh : 16;
 } ads1115_hi_thresh_reg_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ADS1115_ADS1115_REGISTERS_H
